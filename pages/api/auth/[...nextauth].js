@@ -10,4 +10,11 @@ export default NextAuth({
 		}),
 		// ...add more providers here
 	],
+	callbacks: {
+		async session({ session, token }) {
+			// Send properties to the client, like an access_token from a provider.
+			session.user.uid = token.sub
+			return session
+		},
+	},
 })
