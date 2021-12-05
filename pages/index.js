@@ -1,19 +1,9 @@
 import { useState } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import Image from 'next/image'
-import { Text, Button, Spacer, Flex, VStack, useToast } from '@chakra-ui/react'
-import { DeleteIcon } from '@chakra-ui/icons'
-import * as Yup from 'yup'
-import { Formik, Form } from 'formik'
-import CustomInputField from '../components/CustomInputField'
-
-const initialValues = { amount: null, category: '' }
-const validationSchema = Yup.object().shape({
-	category: Yup.string().required('Category is Required'),
-	amount: Yup.number()
-		.required('Amount is Required')
-		.typeError('Invalid Amount'),
-})
+import { Text, Button, Flex, useToast } from '@chakra-ui/react'
+import TransactionModal from '../components/TransactionModal'
+import TransactionAccordion from '../components/TransactionAccordion'
 
 export default function Component() {
 	const { data: session } = useSession()
@@ -90,83 +80,19 @@ export default function Component() {
 						width='100px'
 						height='100px'
 					/>
-					<Button size='lg' colorScheme='messenger' onClick={() => signOut()}>
+					<Button size='md' colorScheme='messenger' onClick={() => signOut()}>
 						Sign out
 					</Button>
 
-					<Formik
-						initialValues={initialValues}
-						validationSchema={validationSchema}
-						onSubmit={({ amount, category }, actions) => {
-							addTransaction(amount, category)
-							actions.setSubmitting(false)
-						}}
-					>
-						{({ errors, touched, isSubmitting, isValid }) => (
-							<Form>
-								<VStack justify='center' align='center' gridGap={1}>
-									<CustomInputField
-										name='amount'
-										label='Amount'
-										error={errors.amount}
-										touched={touched.amount}
-									/>
-									<CustomInputField
-										name='category'
-										label='Category'
-										error={errors.category}
-										touched={touched.category}
-									/>
-									<Spacer />
-									<Button
-										isLoading={isSubmitting}
-										isDisabled={!isValid}
-										type='submit'
-										colorScheme='messenger'
-										size='md'
-										width={120}
-										variant='solid'
-									>
-										Add
-									</Button>
-								</VStack>
-							</Form>
-						)}
-					</Formik>
+					<TransactionModal
+						onSubmit={(amount, category) => addTransaction(amount, category)}
+					/>
 
-					<Button onClick={() => getAllTransactions()}>
-						Get All Transactions
-					</Button>
-					{transactions &&
-						transactions.map(({ _id, amount, category }) => {
-							return (
-								<Flex
-									key={`flex-${_id}`}
-									justify='space-between'
-									align='baseline'
-									w='100%'
-									gridGap={3}
-								>
-									<Text textAlign='center' w={20} key={`category-${_id}`}>
-										{category}
-									</Text>
-									<Text textAlign='center' w={20} key={`amount-${_id}`}>
-										{amount}
-									</Text>
-									<Button
-										onClick={() => {
-											deleteTransaction(_id)
-										}}
-										colorScheme='red'
-									>
-										<DeleteIcon />
-									</Button>
-								</Flex>
-							)
-						})}
-					{transactions && transactions.length === 0 && (
-						<Text>You have no transactions.</Text>
-					)}
+					<TransactionAccordion
+						transactions={transactions}
+						deleteTransaction={(_id) => deleteTransaction(_id)}
+						getAllTransactions={() => getAllTransactions()}
+					/>
 				</Flex>
 			</Flex>
 		)
