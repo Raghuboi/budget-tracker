@@ -1,23 +1,67 @@
 import { useState } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import Image from 'next/image'
-import { Text, Button, Flex } from '@chakra-ui/react'
+import { Text, Button, Spacer, Flex, VStack, useToast } from '@chakra-ui/react'
+import { DeleteIcon } from '@chakra-ui/icons'
+import * as Yup from 'yup'
+import { Formik, Form } from 'formik'
+import CustomInputField from '../components/CustomInputField'
+
+const initialValues = { amount: null, category: '' }
+const validationSchema = Yup.object().shape({
+	category: Yup.string().required('Category is Required'),
+	amount: Yup.number()
+		.required('Amount is Required')
+		.typeError('Invalid Amount'),
+})
 
 export default function Component() {
 	const { data: session } = useSession()
+	const toast = useToast()
 	const [transactions, setTransactions] = useState()
 
-	const addTransaction = () => {
-		fetch('./api/transactions/add', {
+	const deleteTransaction = async (_id) => {
+		await fetch('./api/transactions/delete', {
 			method: 'POST',
 			credentials: 'include',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ uid: session.user.uid, amount: 10 }),
+			body: JSON.stringify({ _id: _id }),
 		})
+		await getAllTransactions()
 	}
 
-	const getAllTransactions = () => {
-		fetch('./api/transactions/get-all', {
+	const addTransaction = async (amount, category) => {
+		await fetch('./api/transactions/add', {
+			method: 'POST',
+			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				uid: session.user.uid,
+				amount: amount,
+				category: category,
+			}),
+		}).then((res) => {
+			if (res.status === 201)
+				toast({
+					title: 'Transaction added!',
+					status: 'success',
+					duration: 2000,
+					isClosable: true,
+				})
+			else
+				toast({
+					title: 'Oops, Internal Server Error',
+					status: 'error',
+					description: 'Please try again',
+					duration: 3000,
+					isClosable: true,
+				})
+		})
+		await getAllTransactions()
+	}
+
+	const getAllTransactions = async () => {
+		await fetch('./api/transactions/get-all', {
 			method: 'POST',
 			credentials: 'include',
 			headers: { 'Content-Type': 'application/json' },
@@ -50,22 +94,79 @@ export default function Component() {
 						Sign out
 					</Button>
 
-					<Button
-						onClick={async () => {
-							await addTransaction()
-							await getAllTransactions()
+					<Formik
+						initialValues={initialValues}
+						validationSchema={validationSchema}
+						onSubmit={({ amount, category }, actions) => {
+							addTransaction(amount, category)
+							actions.setSubmitting(false)
 						}}
 					>
-						Add $10
-					</Button>
+						{({ errors, touched, isSubmitting, isValid }) => (
+							<Form>
+								<VStack justify='center' align='center' gridGap={1}>
+									<CustomInputField
+										name='amount'
+										label='Amount'
+										error={errors.amount}
+										touched={touched.amount}
+									/>
+									<CustomInputField
+										name='category'
+										label='Category'
+										error={errors.category}
+										touched={touched.category}
+									/>
+									<Spacer />
+									<Button
+										isLoading={isSubmitting}
+										isDisabled={!isValid}
+										type='submit'
+										colorScheme='messenger'
+										size='md'
+										width={120}
+										variant='solid'
+									>
+										Add
+									</Button>
+								</VStack>
+							</Form>
+						)}
+					</Formik>
 
 					<Button onClick={() => getAllTransactions()}>
 						Get All Transactions
 					</Button>
 					{transactions &&
-						transactions.map((transaction) => {
-							return <Text key={transaction._id}>{transaction.amount}</Text>
+						transactions.map(({ _id, amount, category }) => {
+							return (
+								<Flex
+									key={`flex-${_id}`}
+									justify='space-between'
+									align='baseline'
+									w='100%'
+									gridGap={3}
+								>
+									<Text textAlign='center' w={20} key={`category-${_id}`}>
+										{category}
+									</Text>
+									<Text textAlign='center' w={20} key={`amount-${_id}`}>
+										{amount}
+									</Text>
+									<Button
+										onClick={() => {
+											deleteTransaction(_id)
+										}}
+										colorScheme='red'
+									>
+										<DeleteIcon />
+									</Button>
+								</Flex>
+							)
 						})}
+					{transactions && transactions.length === 0 && (
+						<Text>You have no transactions.</Text>
+					)}
 				</Flex>
 			</Flex>
 		)

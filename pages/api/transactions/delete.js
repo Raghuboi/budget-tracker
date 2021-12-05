@@ -9,13 +9,9 @@ export default async function handler(req, res) {
 	switch (method) {
 		case 'POST':
 			try {
-				const { uid, amount, category } = req.body
-				const transaction = await new Transaction({
-					uid: uid,
-					amount: amount,
-					category: category,
-				}).save()
-				res.status(201).json({ success: true, transaction: transaction })
+				const { _id } = req.body
+				const deleted = await Transaction.deleteOne({ _id: _id })
+				res.status(201).json({ success: true, deleted: deleted })
 			} catch (error) {
 				res.status(400).json({ success: false })
 			}
