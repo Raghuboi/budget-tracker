@@ -30,6 +30,47 @@ const TransactionAccordion = ({
 		}
 	}, [getAllTransactions, isOpen, transactions])
 
+	const TransactionTable = () => {
+		return (
+			<>
+				{transactions &&
+					transactions.map(({ _id, amount, category, currency, isExpense }) => {
+						return (
+							<Flex
+								key={`flex-${_id}`}
+								justify='space-between'
+								align='baseline'
+								my={3}
+								fontSize='lg'
+								fontWeight='semibold'
+							>
+								<Text textAlign='center' w={100} key={`category-${_id}`}>
+									{category}
+								</Text>
+								<Text textAlign='center' w={60} key={`amount-${_id}`}>
+									{isExpense ? '-' : '+'}
+									{`${currency}${amount}`}
+								</Text>
+								<Button
+									onClick={() => {
+										deleteTransaction(_id)
+									}}
+									colorScheme='red'
+								>
+									<DeleteIcon />
+								</Button>
+							</Flex>
+						)
+					})}
+				{transactions && transactions.length === 0 && (
+					<Text py={3} textAlign='center' fontSize='lg'>
+						You have no transactions.
+					</Text>
+				)}
+			</>
+		)
+	}
+
 	return (
 		<Accordion defaultIndex={[0]} w='100%' allowToggle>
 			<AccordionItem border='none'>
@@ -49,36 +90,7 @@ const TransactionAccordion = ({
 					</AccordionButton>
 				</Flex>
 				<AccordionPanel my={2} p={0} ref={contentRef}>
-					{transactions &&
-						transactions.map(({ _id, amount, category }) => {
-							return (
-								<Flex
-									key={`flex-${_id}`}
-									justify='space-between'
-									align='baseline'
-									w='100%'
-									my={3}
-								>
-									<Text textAlign='center' w={20} key={`category-${_id}`}>
-										{category}
-									</Text>
-									<Text textAlign='center' w={20} key={`amount-${_id}`}>
-										{amount}
-									</Text>
-									<Button
-										onClick={() => {
-											deleteTransaction(_id)
-										}}
-										colorScheme='red'
-									>
-										<DeleteIcon />
-									</Button>
-								</Flex>
-							)
-						})}
-					{transactions && transactions.length === 0 && (
-						<Text>You have no transactions.</Text>
-					)}
+					<TransactionTable />
 				</AccordionPanel>
 			</AccordionItem>
 		</Accordion>
