@@ -85,7 +85,9 @@ export default function Component() {
 					</Button>
 
 					<TransactionModal
-						onSubmit={(amount, category) => addTransaction(amount, category)}
+						onSubmit={(amount, category, currency) =>
+							addTransaction(amount, category, currency)
+						}
 					/>
 
 					<TransactionAccordion
