@@ -27,7 +27,7 @@ const validationSchema = Yup.object().shape({
 		.typeError('Invalid Amount'),
 })
 
-const TransactionModal = ({ onSubmit }) => {
+const TransactionModal = ({ onSubmit, doesUserHaveTransactions }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure()
 	const [currency, setCurrency] = useState('$') // default currency
 
@@ -51,6 +51,7 @@ const TransactionModal = ({ onSubmit }) => {
 								error={errors.amount}
 								touched={touched.amount}
 								currency={currency}
+								isCurrencySelectable={!doesUserHaveTransactions}
 								setCurrency={(currency) => {
 									setCurrency(currency)
 								}}

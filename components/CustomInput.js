@@ -37,6 +37,7 @@ export function CurrencyInputField({
 	touched,
 	setCurrency,
 	currency,
+	isCurrencySelectable,
 }) {
 	const CurrencyMenu = () => {
 		return (
@@ -65,10 +66,13 @@ export function CurrencyInputField({
 				<FormControl isInvalid={error && touched}>
 					<FormLabel htmlFor={name}>{label}</FormLabel>
 					<InputGroup>
-						{/*eslint-disable-next-line react/no-children-prop*/}
-						<InputLeftAddon w='fit-content' p={0}>
-							<CurrencyMenu />
-						</InputLeftAddon>
+						{isCurrencySelectable ? (
+							<InputLeftAddon w='fit-content' p={0}>
+								<CurrencyMenu />
+							</InputLeftAddon>
+						) : (
+							<InputLeftAddon>{currency}</InputLeftAddon>
+						)}
 						<Input {...field} type={type} id={name} />
 					</InputGroup>
 					<FormErrorMessage>{error}</FormErrorMessage>
