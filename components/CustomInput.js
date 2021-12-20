@@ -1,6 +1,5 @@
 import { Field } from 'formik'
 import {
-	Text,
 	FormControl,
 	FormLabel,
 	FormErrorMessage,

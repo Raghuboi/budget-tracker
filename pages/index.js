@@ -20,7 +20,7 @@ export default function Component() {
 		await getAllTransactions()
 	}
 
-	const addTransaction = async (amount, category, currency) => {
+	const addTransaction = async (amount, category, currency, isExpense) => {
 		await fetch('./api/transactions/add', {
 			method: 'POST',
 			credentials: 'include',
@@ -30,6 +30,7 @@ export default function Component() {
 				amount: amount,
 				category: category,
 				currency: currency,
+				isExpense: isExpense,
 			}),
 		}).then((res) => {
 			if (res.status === 201)
@@ -87,8 +88,8 @@ export default function Component() {
 
 					<TransactionModal
 						doesUserHaveTransactions={transactions && transactions.length > 0}
-						onSubmit={(amount, category, currency) =>
-							addTransaction(amount, category, currency)
+						onSubmit={(amount, category, currency, isExpense) =>
+							addTransaction(amount, category, currency, isExpense)
 						}
 					/>
 

@@ -15,6 +15,8 @@ import {
 	ModalBody,
 	ModalCloseButton,
 	useDisclosure,
+	RadioGroup,
+	Radio,
 } from '@chakra-ui/react'
 import { AddIcon } from '@chakra-ui/icons'
 
@@ -30,14 +32,17 @@ const validationSchema = Yup.object().shape({
 const TransactionModal = ({ onSubmit, doesUserHaveTransactions }) => {
 	const { isOpen, onOpen, onClose } = useDisclosure()
 	const [currency, setCurrency] = useState('$') // default currency
-
+	// for Chakra UI's income/expense radio group
+	// TODO: integrate with Formik's radio group component in future
+	const [isExpense, setIsExpense] = useState(true)
+	// ^ initial value needs to be the same as in the radio group
 	const TransactionForm = () => {
 		return (
 			<Formik
 				initialValues={initialValues}
 				validationSchema={validationSchema}
 				onSubmit={async ({ amount, category }, actions) => {
-					await onSubmit(amount, category, currency)
+					await onSubmit(amount, category, currency, isExpense)
 					actions.setSubmitting(false)
 					onClose()
 				}}
@@ -62,6 +67,18 @@ const TransactionModal = ({ onSubmit, doesUserHaveTransactions }) => {
 								error={errors.category}
 								touched={touched.category}
 							/>
+
+							<RadioGroup defaultValue='expense'>
+								<Flex gridGap={4}>
+									<Radio value='expense' onClick={() => setIsExpense(true)}>
+										Expense
+									</Radio>
+									<Radio value='income' onClick={() => setIsExpense(false)}>
+										Income
+									</Radio>
+								</Flex>
+							</RadioGroup>
+
 							<Spacer />
 							<Button
 								isLoading={isSubmitting}
